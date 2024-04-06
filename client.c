@@ -10,10 +10,11 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-// TODO: Tidy up user input, only accept alphanumerial characters.
-// TODO: Abstract some of the code into functions.
-// TODO: Try to abstract some of the web code. It's all pass by reference
-//       and heavily dependent on above imports, so might be difficul.
+void clear_input_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
 int main() {
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
@@ -45,13 +46,9 @@ int main() {
     while (true) {
         printf("Input a char:\n");
         input = getchar();
-
-        // Clear input buffer
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF);
-
-        if (input == 'z') {
-            printf("Special character 'z' passed, exiting...");
+        clear_input_buffer();
+        if (input == '6') {
+            printf("Special character '6' passed, exiting...\n");
             break;
         }
 
