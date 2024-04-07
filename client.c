@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 #define PORT 8080
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1
 
 void clear_input_buffer() {
     int c;
@@ -23,6 +23,34 @@ bool is_valid_input(char c) {
         return true;
     }
     else return false;
+}
+
+void next_ascii(int sock, int valread, char buffer[]) {
+    int input;
+    while (true) {
+        printf("Input a char:\n");
+        input = getchar();
+        if (input == '\n') {
+            printf("No input provided\n\n");
+            continue;
+        }
+        clear_input_buffer();
+        if (!is_valid_input(input)) {
+            printf("Invalid input: %c\n\n", input);
+            continue;
+        }
+        if (input == '6') {
+            printf("Special character '6' passed, exiting...\n");
+            break;
+        }
+
+        // Send char to server
+        send(sock, &input, 1, 0);
+
+        // Receive response from server
+        valread = read(sock, buffer, BUFFER_SIZE);
+        printf("Value from server: %c\n\n", buffer[0]);
+    }
 }
 
 int main() {
@@ -52,29 +80,11 @@ int main() {
         perror("connection failed");
         exit(EXIT_FAILURE);
     }
-
     while (true) {
-        printf("Input a char:\n");
-        input = getchar();
-        clear_input_buffer();
-        if (!is_valid_input(input)) {
-            printf("Invalid input: %c\n", input);
-            continue;
-        }
-        if (input == '6') {
-            printf("Special character '6' passed, exiting...\n");
-            break;
-        }
-
-        // Send char to server
-        send(sock, &input, 1, 0);
-
-        // Receive response from server
-        valread = read(sock, buffer, BUFFER_SIZE);
-        printf("Value from server: %c\n", buffer[0]);
+        next_ascii(sock, valread, buffer);
+        break;
     }
 
-    // Close connection
     close(sock);
     return 0;
 }
