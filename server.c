@@ -1,4 +1,4 @@
-#include <stdio.h>            // Standard I/O functions
+#include <stdio.h>
 #include <stdlib.h>           // Standard library functions
 #include <unistd.h>           // UNIX standard function definitions
 #include <string.h>           // String manipulation functions
@@ -7,7 +7,7 @@
 #include <stdbool.h>       // Internet address family functions
 
 #define PORT 8080            // Port number for the server
-#define BUFFER_SIZE 1024      // Size of the buffer for sending/receiving data
+#define BUFFER_SIZE 1      // Size of the buffer for sending/receiving data
 
 int main() {
     int server_fd, new_socket;             // File descriptors for the server socket and new connections
@@ -46,7 +46,6 @@ int main() {
             perror("accept");                   // Print error message if accept() fails
             exit(EXIT_FAILURE);                // Exit the program with failure status
         }
-        // Accept incoming connection and create a new socket for communication
         while (true) {
             printf("Reading...\n");
             // Block until more data is sent
@@ -58,12 +57,12 @@ int main() {
                 printf("Client disconnected. Going back to accepting state.\n");
                 break;
             }
-            printf("Received: %s\n", buffer); 
+            printf("Received: %c\n", buffer[0]); 
             char* response = &buffer[0];
             printf("Returning: %c\n", ++*response);
             send(new_socket, response, 1, 0);
         }
     }
-    printf("exiting...");
-    return 0;                               // Exit the program with success status
+    printf("Exiting...");
+    return 0;
 }

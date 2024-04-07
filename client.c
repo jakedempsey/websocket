@@ -15,6 +15,16 @@ void clear_input_buffer() {
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
+bool is_valid_input(char c) {
+    bool is_number = c >= 48 && c <= 57;
+    bool is_uppercase = c >= 65 && c <= 90;
+    bool is_lowercase = c >= 97 && c <= 122;
+    if (is_lowercase || is_uppercase || is_number) {
+        return true;
+    }
+    else return false;
+}
+
 int main() {
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
@@ -47,6 +57,10 @@ int main() {
         printf("Input a char:\n");
         input = getchar();
         clear_input_buffer();
+        if (!is_valid_input(input)) {
+            printf("Invalid input: %c\n", input);
+            continue;
+        }
         if (input == '6') {
             printf("Special character '6' passed, exiting...\n");
             break;
