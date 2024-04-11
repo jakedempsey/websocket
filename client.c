@@ -53,6 +53,12 @@ void next_ascii(int sock, int valread, char buffer[]) {
     }
 }
 
+int menu() {
+    printf("Please select an option:\n");
+    printf("(1) N ascii:\n");
+    printf("(2) Unimplemented:\n");
+}
+
 int main() {
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
@@ -70,6 +76,7 @@ int main() {
     serv_addr.sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
+    // "127.0.0.1" is a universal standard called the loopback address. It means localhost
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         perror("Invalid address/ Address not supported");
         exit(EXIT_FAILURE);
@@ -80,7 +87,15 @@ int main() {
         perror("connection failed");
         exit(EXIT_FAILURE);
     }
+    // TODO: Implement menu items
     while (true) {
+        switch(menu()){
+            case('1'):
+                next_ascii(sock, valread, buffer);
+            case('2'):
+                prinf("Not implemented");
+        }
+
         next_ascii(sock, valread, buffer);
         break;
     }

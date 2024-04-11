@@ -16,26 +16,46 @@ int main() {
     int addrlen = sizeof(address);         // Length of the address structure
     char buffer[BUFFER_SIZE] = {0};        // Buffer for sending/receiving data
     const char *hello = "Hello from server"; // Message to send to the client
-    // Create socket file descriptor
+    // Create (listening) socket file descriptor
+    // socket() tells the OS to allocate resources for a socket. The int return value
+    // is the unique address for that socket.
+    // server_fd is a LISTENING socket, it only accepts incoming connections and assigns the
+    // a unique socket.
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");           // Print error message if socket creation fails
         exit(EXIT_FAILURE);                // Exit the program with failure status
     }
     // Attach socket to port 8080 and enable address reuse
+    // setsockopt sets options for a socket.
+    // server_fd is the socket
+    // SOL_SOCKET means we're setting the option at socket level
+    // SO_REUSEADDR is the option: make local addresses 'resuable'. This is because the OS
+    // blocks a port from other bindings for a short period after a socket is closed. This
+    // prevents conflicts with other processes. It's mostly for rapid-starting your server.
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
         perror("setsockopt");              // Print error message if setsockopt() fails
         exit(EXIT_FAILURE);                // Exit the program with failure status
     }
     address.sin_family = AF_INET;          // Set address family to IPv4
-    address.sin_addr.s_addr = INADDR_ANY;  // Allow connections from any IP address
+    // INADDR_ANY allows connections from any interface, since a machine might have several ways
+    // that it's connected to a network. For a client, this isn't super relevant, as it includes
+    // localhost 127.0.0.1, which is where the client is calling from. This would become relevant
+    // when I want to connect to this server from a different machine. It would then listen on
+    // the laptops network card. The loopback address is hosted locally, and doesnt touch any
+    // network intefaces. It is special network interface that is internal to the OS.
+    address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);        // Convert port number to network byte order
     // Bind socket to the specified address
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
         perror("bind failed");              // Print error message if binding fails
         exit(EXIT_FAILURE);                // Exit the program with failure status
     }
+    // TODO: Idea. For now, understand how client-server works step-by-step
+    // TODO: Quick refresher on structs
     while (true) {
         printf("Listening...\n");
+        // listen on this socket with a queue of up to 3 connections. When the client calls the
+        // request first goes to this queue.
         if (listen(server_fd, 3) < 0) {
             perror("listen");                   // Print error message if listen() fails
             exit(EXIT_FAILURE);                // Exit the program with failure status
