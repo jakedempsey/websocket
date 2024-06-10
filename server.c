@@ -52,7 +52,7 @@ int accept_client(struct sockaddr_in address, int server_fd) {
 
 void do_session(int new_socket) {
     while (true) {
-        char buffer[BUFFER_SIZE] = {0};        // Buffer for sending/receiving data
+        char buffer[BUFFER_SIZE] = {0}; // Should cause an error, no?
         printf("Reading...\n");
         int bytes_read = read(new_socket, buffer, BUFFER_SIZE);
         if (bytes_read < 0) {

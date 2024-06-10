@@ -59,12 +59,27 @@ int menu() {
     printf("(2) Unimplemented:\n");
 }
 
-int main() {
+// Does nothing, handles argv if needed in future
+void printArgvArray(int argc, char* argv[]) {
+	printf("\n--------Printing passed arguments (currently unused...)\n\n");
+    for (int i = 0; i < argc; i++) {
+	    printf("Argument %d: ", i);
+	    for (int j = 0; argv[i][j] != '\0'; j++) {
+		    printf("%c", argv[i][j]);
+	    }
+		printf("\n");
+    }
+	printf("\n");
+}
+
+int main(int argc, char* argv[]) {
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
     char *hello = "a";
     int input;
+
+	//printArgvArray(argc, argv);
 
     // Create socket file descriptor
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -82,22 +97,29 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // Connect to server
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        perror("connection failed");
-        exit(EXIT_FAILURE);
-    }
+    // Try to connect to server
+	printf("Attempting to connect to server...\n");
+	while (true) {
+		if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) >= 0) {
+			break;
+			//perror("connection failed");
+			//exit(EXIT_FAILURE);
+		}
+	}
     // TODO: Implement menu items
+	printf("Connected to server!\n");
     while (true) {
         switch(menu()){
             case('1'):
                 next_ascii(sock, valread, buffer);
+				break;
             case('2'):
-                prinf("Not implemented");
+                printf("Not implemented");
+				break;
+			default:
+				printf("Nothing selected. Defaulting to ascii selection\n");
+				next_ascii(sock, valread, buffer);
         }
-
-        next_ascii(sock, valread, buffer);
-        break;
     }
 
     close(sock);
