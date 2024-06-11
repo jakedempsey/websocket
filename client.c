@@ -23,6 +23,7 @@ bool is_valid_input(char c) {
         return true;
     }
     else return false;
+	
 }
 
 void next_ascii(int sock, int valread, char buffer[]) {
@@ -53,23 +54,24 @@ void next_ascii(int sock, int valread, char buffer[]) {
     }
 }
 
-int menu() {
-    printf("Please select an option:\n");
-    printf("(1) N ascii:\n");
-    printf("(2) Unimplemented:\n");
-}
-
-// Does nothing, handles argv if needed in future
-void printArgvArray(int argc, char* argv[]) {
-	printf("\n--------Printing passed arguments (currently unused...)\n\n");
-    for (int i = 0; i < argc; i++) {
-	    printf("Argument %d: ", i);
-	    for (int j = 0; argv[i][j] != '\0'; j++) {
-		    printf("%c", argv[i][j]);
-	    }
-		printf("\n");
-    }
-	printf("\n");
+// Prints menu and returns the selection
+// TODO: Remove 'exit' from here and make it a global option you can do from any
+// where in the program
+char menu() {
+	while (true) {
+		printf("Please select an option:\n");
+		printf("(1) Get next ascii:\n");
+		printf("(2) Exit:\n");
+		char input = getchar();
+		clear_input_buffer();
+		if (input == '\n') {
+			printf("No input provided\n\n");
+		}
+		else if (input != '1' && input != '2') {
+			printf("Invalid input: %c\n\n", input);
+		}
+		else return input;
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -91,37 +93,36 @@ int main(int argc, char* argv[]) {
     serv_addr.sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
-    // "127.0.0.1" is a universal standard called the loopback address. It means localhost
+    // "127.0.0.1" is a universal standard called the loopback address. It means
+	// localhost
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         perror("Invalid address/ Address not supported");
         exit(EXIT_FAILURE);
     }
-
-    // Try to connect to server
-	printf("Attempting to connect to server...\n");
+	// Outer loop to retry if server disconnects
 	while (true) {
-		if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) >= 0) {
-			break;
-			//perror("connection failed");
-			//exit(EXIT_FAILURE);
+		// Loop to keep trying to connect to server
+		printf("Attempting to connect to server...\n");
+		while (true) {
+			if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))
+					>= 0) {
+				break;
+				//perror("connection failed");
+				//exit(EXIT_FAILURE);
+			}
+		}
+		// TODO: Implement menu items
+		printf("Connected to server!\n");
+		while (true) {
+			char selection = menu();
+			if (selection == '1') {
+				next_ascii(sock, valread, buffer);
+			}
+			if (selection =='2') {
+				printf("Exiting...\n");
+				close(sock);
+				return 0;
+			}
 		}
 	}
-    // TODO: Implement menu items
-	printf("Connected to server!\n");
-    while (true) {
-        switch(menu()){
-            case('1'):
-                next_ascii(sock, valread, buffer);
-				break;
-            case('2'):
-                printf("Not implemented");
-				break;
-			default:
-				printf("Nothing selected. Defaulting to ascii selection\n");
-				next_ascii(sock, valread, buffer);
-        }
-    }
-
-    close(sock);
-    return 0;
 }
